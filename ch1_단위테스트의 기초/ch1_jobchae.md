@@ -197,12 +197,12 @@ n1 --> e3
     }
     const { nickname } = updateNicknameDto;
 
-    const existedUser = await this.getUserByNickname(nickname); // 종료점 2 - 서드 파티 호출 
+    const existedUser = await this.getUserByNickname(nickname); 
     if (existedUser && existedUser.id !== id) { 
-      throw conflict();  // 종료점 3 - 값 or 에러 반환
+      throw conflict();  // 종료점 2 - 값 or 에러 반환
     }
 
-    // 종료점 4 - 서드 파티 호출
+    // 종료점 3 - 서드 파티 호출
     const updatedUser = await this.prisma.user.update({
       where: { id, isDeleted: false },
       data: {
@@ -210,7 +210,7 @@ n1 --> e3
       },
     });
 
-    // 종료점 5 - 값 반환
+    // 종료점 4 - 값 반환
     return {
       nickname: updatedUser.nickname,
     };
@@ -237,7 +237,7 @@ n1 --> e3
       expect(result).rejects.toThrowError(forbidden());
     });
 
-    // 종료점 4 호출 검증, 종료점 5 값 검증
+    // 종료점 3 호출 검증, 종료점 4 값 검증
     it('존재하는 userId 와 일치하는 id, 수정할 닉네임이 주어지면, 닉네임을 수정하고, 수정한 닉네임을 반환한다.', async () => {
       const id: number = 1;
 
@@ -262,7 +262,7 @@ n1 --> e3
 ```
 
 종료점 1에 대한 에러 반환 검증, 종료점 4 서드파티 호출 검증, 종료점 5 값 반환 검증은 하고 있으나    
-종료점 2, 3에 대한 검증은 테스트되고 있지 않는 걸 알 수 있다.
+종료점 2에 대한 검증은 테스트되고 있지 않는 걸 알 수 있다.
 
 작성한 테스트 코드를 보면,    
 값 반환에 대한 검증은 진입점을 호출하고 실행 결과 값을 받아 그 값을 확인하는 테스트를 진행하고 있다.   
