@@ -78,7 +78,7 @@ test('verifyPassword, given a failing rule, return errors', () => {
 ```
 
 > [!TIP]   
-> 문자열을 검증할 때는 `toMatch()` 처럼 문자열 전체를 비교하는 함수보다 `toContain()` 같이 일부 문자열이 포함되었는지를 검증하는 것이 유지 보수에 좋다.
+> 문자열을 검증할 때는 `toMatch()` 처럼 문자열 전체를 비교하는 함수보다 `toContain()` 같이 일부 문자열이 포함 되었는지를 검증하는 것이 유지 보수에 좋다.
 
 ### describe와 it
 - jest에서는 `describe()` 를 통해 테스트 코드 구조를 체계적으로 나누어 관리할 수 있다.
@@ -161,7 +161,7 @@ expect(errors.length).toBe(1); // 새롭게 추가한 검증 코드
 expect(errors[0]).toContain('fake reason');
 ```
 
-새롭게 추가한 검증 라인이 실패하면 두번째 검증 코드는 실행되지 않는다.
+새롭게 추가한 검증 라인이 실패하면 두번째 검증 코드는 실행되지 않는다.   
 이런 경우는 두 검증을 별도의 테스트로 분리하는 것이 효과적이다.
 
 ```js
@@ -196,7 +196,7 @@ describe('verifyPassword', () => {
 });
 ```
 ### beforeEach()
-위에서 테스트 케이스를 분리했지만, 중복된 코드가 너무 많다.
+위에서 테스트 케이스를 분리했지만, 중복된 코드가 너무 많다.   
 이런 경우 중복 코드를 제거하기 위해 `beforeEach()` 를 사용하면 도움이 된다.
 
 ```js
@@ -248,10 +248,10 @@ describe('verifyPassword', () => {
 이는 테스트가 많아질 수록 피로감을 느끼게 되는 요소이다.
 
 ### 팩토리 함수 사용
-> ![TIP]
+> [!TIP]
 > - 팩토리 함수는 객체나 특정 상태를 쉽게 생성하고, 여러 곳에서 동일한 로직을 재사용할 수 있도록 도와주는 간단한 helper 함수이다.
 
-위에서 단점을 느낀 테스트 코드를 팩토리 함수를 사용해 리팩터링 해보자
+위에서 단점을 느낀 테스트 코드를 팩토리 함수를 사용해 리팩터링 해보자   
 추가적으로 성공 상태도 확인할 수 있도록 passingRule을 추가한 검증 코드를 추가한다.
 ```js
 // beforEach => 팩토리 함수
@@ -260,14 +260,18 @@ const passingRule = () => ({ passed: true, reason: '' });
 
 const makeVerifierWithPassingRule = () => {
     const verifier = makeVerifier();
+
     verifier.addRule(passingRule);
+
     return verifier;
 }
 
 const makeVerifierWithFailedRule = (reason) => {
     const verifier = makeVerifier();
     const fakeRule = () => ({ passed: false, reason });
+
     verifier.addRule(fakeRule);
+
     return verifier;
 }
 
@@ -286,6 +290,7 @@ describe('PasswordVerifier', () => {
         it('has no errors', () => {
             const verifier = makeVerifierWithPassingRule();
             const errors = verifier.verify('any input');
+
             expect(errors.length).toBe(0);
         });
     });
@@ -294,7 +299,9 @@ describe('PasswordVerifier', () => {
         it('has an error', () => {
             const verifier = makeVerifierWithFailedRule('fake reason');
             verifier.addRule(passingRule);
+
             const errors = verifier.verify('any input');
+
             expect(errors.length).toBe(1);
         });
         ... 중략
@@ -324,13 +331,15 @@ const oneUpperCaseRule = (input) => {
 ```js
 describe('one uppercase rule', () => {
     test('given no uppercase, it fails', () => {
-        const result = oneUpperCaseRule('abc'); 
+        const result = oneUpperCaseRule('abc');
+
         expect(result.passed).toEqual(false);
     });
 
     // 배열에 있는 값을 순회하며 테스트 
     test.each(['Abc', 'aBc'])('given one uppercase, it passes', (input) => {
-        const result = oneUpperCaseRule(input); 
+        const result = oneUpperCaseRule(input);
+
         expect(result.passed).toEqual(true);
     });
 });
@@ -344,7 +353,8 @@ describe('one uppercase rule', () => {
         ['abc', false],
         ['aBc', true],
     ])('given %s, %s', (input, expected) => {
-        const result = oneUpperCaseRule(input); 
+        const result = oneUpperCaseRule(input);
+
         expect(result.passed).toEqual(expected);
     });
 });
@@ -458,7 +468,7 @@ const { verify } = require('../ch1_verify')
 test('try-catch / verify, with no input, throws exception', () => {
     try {
         verify('');
-        fail('error was expected but not thrown') // 오류가 발생하지 않으면 테스트는 실패
+        fail('error was expected but not thrown') 
     } catch (e) {
         expect(e.message).toContain('no input value');
     }
@@ -466,7 +476,7 @@ test('try-catch / verify, with no input, throws exception', () => {
 
 // expect().toThrowError 테스트
 test('expect().toThrowError() / verify, with no input, throws exception', () => {
-    expect(() => verify('')).toThrowError(/no input value/); // 정규 표현식으로 확인
+    expect(() => verify('')).toThrowError(/no input value/);
 });
 ```
 
