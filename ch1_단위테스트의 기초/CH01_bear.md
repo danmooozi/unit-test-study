@@ -90,5 +90,32 @@ const sum = (numbers) => {
 - **상태값을 변경하는 종료점**: 어떤 것을 호출 후 다른 것을 호출하여 확인 혹은 이전에 호출한 것을 다시 호출하여 모든것이 의도대로 흘러갔는지 확인
 - **서드파티를 호출하는 종료점**: 모의 객체를 만들어 테스트 결과를 임의로 조작하는 방법
 
+이중 서드파티를 호출하는(모의 객체로 테스트) 종료점이 제일 까다롭다고 한다.
 
+## 1.6 처음부터 테스트코드 작성
 
+```javascript
+const sum = (numbers) => {
+    const [a,b] = numbers.split(',');
+    const result =  parseInt(a) + parseInt(b);
+
+    return result;
+}
+```
+
+위 코드를 직접 테스트 코드를 작성해보면 프레이워크 없이!
+
+```javascript
+const parseInt = () => {
+    try{
+        const result = sum('1,2');
+        if ( result === 3) {
+            console.log('parserTest example 1 PASSED');
+        } else {
+            throw new Error (`arserTest: expected 3 but was ${result}`);
+        }
+    } catch (e) {
+        console.error(e);
+    }
+}
+```
