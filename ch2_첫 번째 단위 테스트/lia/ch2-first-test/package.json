@@ -1,0 +1,13 @@
+{
+	"name": "ch2-first-test",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"test": "test",
+		"testw": "jest --watchAll"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC"
+}
