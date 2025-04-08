@@ -398,7 +398,7 @@ describe('password verifier with interfaces', () => {
 ## Example Case
 <!-- 발표 주제가 적용되어 있는 라이브러리, 실제 업무에 적용되어 있는 코드, 직접 만든 예시 코드, 자신의 느낀점 등을 첨부하여 이해를 돕습니다. -->
 - 목이랑 스텁 정말 헷갈린다.
-- 오늘은 뭐라도 직접 해보면 좋을 것 같아 예전에 [kimbap.js](https://github.com/danmooozi/kimbap.js/blob/main/src/sourcemap/index.js) 에서 만들었던 sourcemap creator 코드를 사용해 책에 나온 객체 지향 방식으로 변경해 익혀보았다.
+- 오늘은 뭐라도 직접 해보면 좋을 것 같아 예전에 [kimbap.js](https://github.com/danmooozi/kimbap.js/blob/main/src/sourcemap/index.js) 에서 만들었던 sourcemap creator 코드를 사용해 직접 책에 나온 객체 지향 방식과 모듈 주입 방식으로 변경하면서 내용을 익혀보았다.
 ```js
 // 원래 코드
 
