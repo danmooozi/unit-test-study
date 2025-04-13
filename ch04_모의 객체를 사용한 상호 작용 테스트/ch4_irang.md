@@ -26,7 +26,7 @@
 import { useEffect, useRef } from 'react';
 
 export function useOutsideClick(callback: () => void) {
-  const ref = useRef<HTMLDivElement | null>(null);
+  const ref = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
@@ -84,7 +84,7 @@ describe('useOutsideClick', () => {
 
     fireEvent.mouseDown(getByTestId('outside'));
 
-    // 종료점이 호출됐는지 검증 (횟수로 확인하는 검증)
+    // 종료점이 호출되었는지 검증
     expect(mockCallback).toHaveBeenCalledTimes(1);
   });
 
@@ -93,9 +93,9 @@ describe('useOutsideClick', () => {
       <TestComponent onOutsideClick={mockCallback} />
     );
 
-    // 종료점이 호출됐는지 검증 (여부로 확인하는 검증)
     fireEvent.mouseDown(getByTestId('inside'));
 
+    // 종료점이 호출되지 않았는지 검증
     expect(mockCallback).not.toHaveBeenCalled();
   });
 });
