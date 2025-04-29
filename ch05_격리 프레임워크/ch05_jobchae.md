@@ -380,10 +380,10 @@ describe('working with substitute part 2', () => {
 <!-- 발표 주제가 적용되어 있는 라이브러리, 실제 업무에 적용되어 있는 코드, 직접 만든 예시 코드, 자신의 느낀점 등을 첨부하여 이해를 돕습니다. -->
 - 사실 격리 프레임워크는 jest 말고는 잘 몰라서 `substitute.js` 는 처음 보게됐는데 함수형이냐, 객체 지향형이냐에 따라 어울리는 프레임워크가 따로 있다는게 신기했다.
 - jest가 제공하는 함수들이 mock 이라서 그동안 mock / stub 개념이 헷갈렸는데 이번 5장을 읽고 좀 개념이 잡힌 것 같다.
-- 기존에는 스텁으로 사용하는 것도 모의 객체 이름을 `mockGetInfo()` 등으로 지었는데!! 앞으로는 변수명에 stub을 활용해 mock과 stub 을 명시적으로 분리하는 연습을 해봐야겠다.
+- 기존에는 스텁으로 사용하는 것도 모의 객체 이름을 `mockGetInfo()` 등으로 지었는데!!    앞으로는 변수명에 stub을 활용해 mock과 stub 을 명시적으로 분리하는 연습을 해봐야겠다.
 
-저번에 회사에서 유틸 함수 중에 DB batch operation을 처리하는 간단한 함수 하나를 만들고 테스트 코드를 구현했었는데 아래와 같다. (별로 보안상 위험한 코드는 아니고 유틸 함수라서 가져옴)
-고칠 수 있는 점, mock/stub을 헷갈리게 쓰던 부분을 표시해보았다. 
+저번에 유틸 함수 중에 DB batch operation을 처리하는 간단한 함수 하나를 만들고 테스트 코드를 구현했었는데 아래와 같다.    
+쭉 보면서 고칠 수 있는 점, mock/stub을 헷갈리게 쓰던 부분을 주석으로 남겨보았다. 
 ```js
 describe('models/utils/function', () => {
 	describe('processBatchOperationByCutoffDate', () => {
@@ -402,18 +402,23 @@ describe('models/utils/function', () => {
 		beforeEach(() => {
 			jest.clearAllMocks();
 
-			mockGetBatchDataFunc = jest.fn(); // 뭔가 지금 보니 이 친구를 굳이 jest로 만들지 않고 위에 만든 makeBatchData stub을 바로 보내도 될 것 같다.
+            // 뭔가 지금 보니 이 친구를 굳이 jest로 만들지 않고 위에 만든 makeBatchData stub을 바로 써도 될 것 같다.
+			mockGetBatchDataFunc = jest.fn(); 
 			mockBatchOperationFunc = jest.fn();
 
 			testParams = {
 				size: mockBatchSize,
-				getBatchDataFunc: mockGetBatchDataFunc, // 여기에 그냥 getBatchDataFunc: stubGetBatchData(size) 해도 될듯?
+				getBatchDataFunc: mockGetBatchDataFunc, 
 				batchOperationFunc: mockBatchOperationFunc,
 			};
 		});
 
 		test('batchData가 0개 일 때 batch operation 수행하지 않고 종료', async () => {
-			mockGetBatchDataFunc.mockResolvedValue([]); // stub이니까 stubGetBatchDataFunc.mockResolvedValue([]) 이렇게 명시해주는게 더 좋을 것 같다.
+            /**
+             * stub이니까 stubGetBatchDataFunc.mockResolvedValue([])
+             * 이렇게 명시해주는게 더 좋을 것 같다.
+            */
+			mockGetBatchDataFunc.mockResolvedValue([]); 
 
             /**
              *  아니면 굳이 resolvedValue쓰지 않고 만들어둔 stub function 사용해서
@@ -429,7 +434,7 @@ describe('models/utils/function', () => {
 });
 ```
 
-뭔가 지금까지 읽고 나서 보니 이 테스트 코드에 고칠 점이 많이 보인다.
+뭔가 지금까지 읽고 나서 보니 이 테스트 코드에 고칠 점이 많이 보이네요.
 
 ```js
 describe('models/utils/function', () => {
@@ -462,7 +467,8 @@ describe('models/utils/function', () => {
 			const ret = await utilFunction.processBatchOperation({ ...testParams, getBatchDataFunc });
 
 			expect(ret).toBe(0);
-			expect(mockBatchOperationFunc).not.toHaveBeenCalled(); // 갑자기 궁금한데 이거는 반환 값 테스트 + 호출 테스트 이면 종료점 2개를 같이 테스트한 거 일까요?
+			expect(mockBatchOperationFunc).not.toHaveBeenCalled(); 
+            // 갑자기 궁금한데 이거는 반환 값 테스트 + 호출 테스트 이면 종료점 2개를 같이 테스트한 거 일까요?
 		});
 	});
 });
@@ -470,11 +476,12 @@ describe('models/utils/function', () => {
 ```
 
 위에서 혼자 골라본 고칠 점들을 찾아서 한번 수정해보았다.
-1. stub 인데 mock 이라고 명시한 것 
-2. stub func을 만들었는데 `jest.fn` 으로 모의 객체를 또 생성한 것 
+1. stub 인데 mock 이라고 명시한 것  
+2. stub func을 만들었는데 `jest.fn()` 으로 모의 객체를 또 생성한 것 
 
-오 제가 보기엔 뭔가 테스트가 좀 더 간결해진 것 같은데 어떤가요?
-앞으로도 테스트 코드 작성시 stub/mock 구분을 꼭 생각해서 해보고 내가 불필요한 모의 객체를 만들진 않았다 고민해보겠습니다. 
+오 제가 보기엔 뭔가 테스트가 좀 더 간결해진 것 같은데 어떤가요? 
+
+앞으로도 테스트 코드 작성시 **stub/mock 구분을 꼭 생각**해서 해보고 불필요한 모의 객체를 만들진 않았나 한번 더 고민해보겠습니다. 
 
 ## Wrap-up
 <!-- 발표를 마무리하며 발표 주제를 다시 요약하고 정리합니다. -->
