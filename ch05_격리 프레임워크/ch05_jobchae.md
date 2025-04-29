@@ -439,7 +439,7 @@ describe('models/utils/function', () => {
 ```js
 describe('models/utils/function', () => {
 	describe('processBatchOperationByCutoffDate', () => {
-         afterEach(jest.resetAllMocks); 
+        afterEach(jest.resetAllMocks); 
 
 		const mockBatchSize = 3;
 
@@ -466,9 +466,9 @@ describe('models/utils/function', () => {
 
 			const ret = await utilFunction.processBatchOperation({ ...testParams, getBatchDataFunc });
 
+            // 갑자기 궁금한데 이거는 반환 값 테스트 + 호출 테스트 이면 종료점 2개를 같이 테스트한 거 일까요?
 			expect(ret).toBe(0);
 			expect(mockBatchOperationFunc).not.toHaveBeenCalled(); 
-            // 갑자기 궁금한데 이거는 반환 값 테스트 + 호출 테스트 이면 종료점 2개를 같이 테스트한 거 일까요?
 		});
 	});
 });
