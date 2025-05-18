@@ -306,7 +306,7 @@ describe('unit test website verifier', () => {
 함수형 디자인 패턴에서는 네트워크 어댑터 모듈을 website verifier 에 주입하는 방식이 달라진다.
 ```js
 const isWebsiteAlive = async (network) => {
-    const result = await netwrok.fetchUrlText("http://example.com");
+    const result = await network.fetchUrlText("http://example.com");
     if (result.ok) {
         const text = result.text;
         return processFetchSuccess(text);
@@ -523,9 +523,9 @@ describe('calcuate1 - with jest', () => {
 });
 ```
 이렇게 jest 를 사용해 타이머를 대체해도 모든 로직이 동기적으로 작동해 `done()` 함수를 호출할 필요가 없다.   
-`advanceTimersToNextTimers`를 사용하지 않으면 가짜로 만든 `setTimeout`이 영원히 실행되지 않으니 주의해야한다. 
+`advanceTimersToNextTimer`를 사용하지 않으면 가짜로 만든 `setTimeout`이 영원히 실행되지 않으니 주의해야한다. 
 
-특히 `advanceTimersToNextTimers` 를 사용하면 지정된 단계 수만큼 모든 타이머를 앞으로 진행 시켜 다음 타이머 콜백이 실행되도록 할 수도 있다. -> `setInterval`을 사용하는 경우 유용하다. 
+특히 `advanceTimersToNextTimer` 를 사용하면 지정된 단계 수만큼 모든 타이머를 앞으로 진행 시켜 다음 타이머 콜백이 실행되도록 할 수도 있다. -> `setInterval`을 사용하는 경우 유용하다. 
 
 ```js
 const calculate2 = (getInputFn, resultFn) => {
