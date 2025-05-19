@@ -922,6 +922,171 @@ describe("index helper", () => {
 ## Example Case
 
 <!-- 발표 주제가 적용되어 있는 라이브러리, 실제 업무에 적용되어 있는 코드, 직접 만든 예시 코드, 자신의 느낀점 등을 첨부하여 이해를 돕습니다. -->
+테스트 코드가 없는 함수(requestDomainRemoveToOsMaster) 테스트 코드 작성
+```js
+exports.requestDomainRemove = async ({ containerName, region }) => {
+	if (typeof containerName !== 'string' || containerName === '') {
+		throw new TypeError(`containerName is not a string or a empty string`);
+	}
+
+	if (typeof region !== 'string' || region === '') {
+		throw new TypeError(`region is not a string or a empty string`);
+	}
+
+	const host = global.HOST[region];
+	const port = global.PORT[region];
+	const path = `/container/domain/${containerName}`;
+
+	const { data } = await axios.delete(`http://${host}:${port}${path}`);
+
+	return data && data.message === 'SUCCESS';
+};
+```
+```js
+describe('requestDomainRemove', () => {
+		const mockContainerName = 'test-1';
+		const mockRegion = 'seoul';
+		const mockHost = '0.0.0.0';
+		const mockPort = '8080';
+
+		beforeEach(() => {
+			global.HOST = {
+				[mockRegion]: mockHost,
+			};
+			global.GOORM_OS_MASTER_PORT = {
+				[mockRegion]: PORT,
+			};
+		});
+
+		afterEach(() => {
+			jest.clearAllMocks();
+			delete global.HOST;
+			delete global.PORT;
+		});
+
+		test('containerName이 유효하지 않으면 TypeError', async () => {
+			await expect(
+				serContainer.requestDomainRemove({
+					containerName: '',
+					region: mockRegion,
+				}),
+			).rejects.toThrow(
+				'containerName is not a string or a empty string',
+			);
+
+			await expect(
+				serContainer.requestDomainRemove({
+					containerName: 123,
+					region: mockRegion,
+				}),
+			).rejects.toThrow(
+				'containerName is not a string or a empty string',
+			);
+		});
+
+		test('region이 유효하지 않으면 TypeError', async () => {
+			await expect(
+				serContainer.requestDomainRemove({
+					containerName: 'abc',
+					region: '',
+				}),
+			).rejects.toThrow('region is not a string or a empty string');
+		});
+
+		test('goormos-master api 응답 메세지가 SUCCESS이면 true 반환', async () => {
+			axios.delete.mockResolvedValueOnce({
+				data: { message: 'SUCCESS' },
+			});
+			const result = await serContainer.requestDomainRemove({
+				containerName: mockContainerName,
+				region: mockRegion,
+			});
+			expect(axios.delete).toHaveBeenCalledWith(
+				`http://${mockHost}:${mockPort}/container/domain/${mockContainerName}`,
+			);
+
+			expect(result).toBe(true);
+		});
+
+		test('goormos-master api 응답 메세지가 SUCCESS가 아니면 false 반환', async () => {
+			axios.delete.mockResolvedValueOnce({
+				data: { message: 'FAILURE' },
+			});
+			const result = await serContainer.requestDomainRemove({
+				containerName: mockContainerName,
+				region: mockRegion,
+			});
+
+			expect(result).toBe(false);
+		});
+
+		test('axios.delete error 발생 시 throw error 하는지 확인', async () => {
+			axios.delete.mockRejectedValueOnce(new Error('Network Error'));
+
+			await expect(
+				serContainer.requestDomainRemove({
+					containerName: mockContainerName,
+					region: mockRegion,
+				}),
+			).rejects.toThrow('Network Error');
+		});
+	});
+```
+이전 방식 (불필요하게 전체 global을 복사)
+```js
+const originalGlobal = global;
+
+afterEach(() => {
+  global = originalGlobal; // ❌ 일반적으로 권장되지 않음
+});
+```
+전역 객체 전체를 복사해서 테스트 후 복원하려는 시도입니다.
+
+하지만 Node.js의 global 객체는 **읽기 전용(read-only)** 이며, 대입으로 재할당하는 것은 원칙적으로 잘못된 사용입니다.
+
+🧠 왜 delete를 해주는가?
+
+✅ 이유 1: 테스트 격리(Isolation) 보장
+- 테스트 간에 전역 객체에 남아 있는 값이 다른 테스트에 영향을 줄 수 있기 때문입니다.
+- 특히 테스트를 병렬로 실행하거나, 순서가 달라질 때 문제를 유발할 수 있습니다.
+- 예를 들어, HOST 남아 있는 값 때문에 유효하지 않은 입력을 테스트할 때 실패할 수 있어요.
+
+✅ 이유 2: 글로벌 오염(Global Pollution) 방지
+- 전역에 뭔가 추가했으면, **정리(clean-up)**하는 것이 테스트의 기본 원칙입니다.
+- 일종의 메모리 누수/오염 예방 습관으로 보면 됩니다.
+-----
+외부 의존성 mocking 관련 문제
+1. jest.mock('axios') 방식
+```js
+import axios from 'axios';
+jest.mock('axios'); // axios 전체를 mock 처리
+
+axios.delete.mockResolvedValue({ data: 'data' });
+```
+2. Mocker.create().makeSpy(...) 방식
+```js
+Mocker.create()
+  .makeSpy({ module: axios, funcName: 'delete' })
+  .mockResolvedValue({ data: 'data' });
+```
+| 항목         | `jest.mock('axios')` | `makeSpy({ module: axios, funcName: 'delete' })` |
+| ---------- | -------------------- | ------------------------------------------------ |
+| 목적         | 전체 axios mocking     | 특정 함수만 mocking                                   |
+| mock 적용 범위 | axios 모듈 전체          | axios.delete 등 일부 함수                             |
+| setup 위치   | 파일 최상단               | 테스트 내부, 혹은 유틸로 분리 가능                             |
+| 테스트 격리성    | 높음 (jest가 전체 관리)     | 적절히 구성해야 보장됨                                     |
+| 유연성        | 낮음                   | 높음                                               |
+| 사용 예시      | 기본적인 mock 테스트        | 부분 mock, spy 기반 검증 등 정밀한 컨트롤                     |
+
+언제 어떤 방식을 써야할지?
+| 상황                            | 추천 방식                                |
+| ----------------------------- | ------------------------------------ |
+| 대부분의 테스트에서 axios 전체 mock 필요   | `jest.mock('axios')`                 |
+| 테스트별로 응답을 정밀하게 조작하고 싶을 때      | `jest.spyOn()` or `Mocker` 사용        |
+| 함수 호출 여부, 파라미터 검증 등 spy 기능 필요 | `jest.spyOn()` or `Mocker.makeSpy()` |
+
+
+> 사실 지금까지 대부분 비동기 코드 단위의 테스트코드를 짜고 있었을거라, 해당 예제에서의 특이점은 못찾겠음. 진입점을 작게 쪼개 단위를 많이 만든 것보다 어댑터 분리 패턴을 사용하는게 더 코드 유지 보수 측면에서 좋지 않을까..? 싶음..
 
 ## Wrap-up
 
