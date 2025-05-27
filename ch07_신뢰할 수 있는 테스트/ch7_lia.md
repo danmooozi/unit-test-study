@@ -345,6 +345,32 @@ Tip. 테스트를 나눌 때 고려해야 할 점
 ## Example Case
 
 <!-- 발표 주제가 적용되어 있는 라이브러리, 실제 업무에 적용되어 있는 코드, 직접 만든 예시 코드, 자신의 느낀점 등을 첨부하여 이해를 돕습니다. -->
+종료점(관심사)를 두 개 가진 함수 예시
+
+```js
+// 값을 반환하면서 동시에 매개변수로 전달된 콜백 함수를 실행함.
+const trigger = (x, y, callback) => {
+	callback("I'm triggered");
+	return x + y;
+};
+두 가지 종료점을 동시에 확인하는 테스트 예제
+
+describe("trigger", () => {
+	it("works", () => {
+		const callback = jest.fn();
+		const result = trigger(1, 2, callback);
+		expect(result).toBe(3);
+		expect(callback).toHaveBeenCalledWith("I'm triggered");
+	});
+});
+```
+테스트에서 여러 가지를 테스트하면 문제가 되는 이유
+
+- 대부분의 단위 테스트 프레임워크에서 검증이 실패하면 테스트 프레임워크가 특별한 예외를 던짐. → 테스트가 실패한 것으로 처리됨
+- expect(result).toBe(3) 검증이 실패하면 다음 코드는 전혀 실행되지 않음
+
+-> expect 를 한 테스트코드에서 사용하는 경우가 많음. 
+맞는 테스트코드일까? ([기존 코드](https://github.com/goorm-dev/ide-site/blob/develop/src/server/service/__tests__/pricing.test.js))
 
 ## Wrap-up
 
